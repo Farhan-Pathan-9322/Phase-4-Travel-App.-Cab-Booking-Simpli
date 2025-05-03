@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Management Solution</title>
+</head>
+<body>
+    <h1>Welcome to Travel Management Solution</h1>
+
+    <!-- Form to Add Booking -->
+    <form id="bookingForm">
+        <h2>Book A Cab</h2>
+        <input type="text" id="source" placeholder="Source" required>
+        <input type="text" id="destination" placeholder="Destination" required>
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>All Bookings</h2>
+    <table id="bookingsTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Source</th>
+                <th>Destination</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Bookings will be dynamically populated here -->
+        </tbody>
+    </table>
+
+    <script>
+        const API_BASE_URL = "http://localhost:9090/api/bookings";
+
+        // Add new booking
+        document.getElementById("bookingForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const source = document.getElementById("source").value;
+            const destination = document.getElementById("destination").value;
+            
+            console.log("Source:", source);  // Debugging log
+            console.log("Destination:", destination);  // Debugging log
+
+            try {
+                const response = await fetch(API_BASE_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ source, destination })
+                });
+
+                if (response.ok) {
+                    alert("Booking created successfully!");
+                    document.getElementById("bookingForm").reset();
+                    fetchBookings();
+                } else {
+                    alert("Failed to create booking.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        });
+
+        // Fetch all bookings
+        async function fetchBookings() {
+            try {
+                const response = await fetch(API_BASE_URL);
+                if (response.ok) {
+                    const bookings = await response.json();
+                    const tbody = document.querySelector("#bookingsTable tbody");
+                    tbody.innerHTML = ""; // Clear existing table rows
+
+                    bookings.forEach((booking) => {
+                        console.log("Booking Data:", booking);  // Debugging log
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${booking.id}</td>
+                            <td>${booking.source}</td>
+                            <td>${booking.destination}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    alert("Failed to fetch bookings.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        // Fetch bookings on page load
+        fetchBookings();
+    </script>
+</body>
+</html>
